@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import ProductCard from './ProductCard';
 import { ChevronDown, Search, X } from 'lucide-react';
-import { api } from '../services/api';
+import { products as allProductsData, categories as allCategories } from '../data/mockData';
 
 const ProductGrid = memo(() => {
   const [products, setProducts] = useState([]);
@@ -16,16 +16,10 @@ const ProductGrid = memo(() => {
   const PRODUCTS_PER_PAGE = 20;
 
   useEffect(() => {
-    api.products.getAll()
-      .then(productsData => {
-        setProducts(Array.isArray(productsData) ? productsData : []);
-        const uniqueCategories = [...new Set((Array.isArray(productsData) ? productsData : []).map(p => p.category?.name).filter(Boolean))];
-        setCategories(uniqueCategories.sort());
-        setLoading(false);
-      })
-      .catch(() => {
-        setLoading(false);
-      });
+    setProducts(allProductsData);
+    const categoryNames = allCategories.map(c => c.id);
+    setCategories(categoryNames.sort());
+    setLoading(false);
   }, []);
 
   const filteredProducts = useMemo(() => {
@@ -40,7 +34,7 @@ const ProductGrid = memo(() => {
     }
 
     if (selectedCategory !== 'all') {
-      result = result.filter(p => p.category?.name === selectedCategory);
+      result = result.filter(p => p.category === selectedCategory);
     }
 
     result = result.filter(p => 

@@ -7,19 +7,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        'andino-beige': '#f9f6e5',
-        'andino-green': '#77da96',
-        'andino-dark-green': '#5ab87a',
-        'andino-brown': '#3e2723',
-        'andino-dark': '#1a120f',
+        theme: {
+          bg: 'var(--theme-bg)',
+          'bg-secondary': 'var(--theme-bg-secondary)',
+          text: 'var(--theme-text)',
+          'text-secondary': 'var(--theme-text-secondary)',
+          accent: 'var(--theme-accent)',
+          'accent-hover': 'var(--theme-accent-hover)',
+          border: 'var(--theme-border)',
+          card: 'var(--theme-card)',
+          button: 'var(--theme-button)',
+          'button-text': 'var(--theme-button-text)',
+        },
       },
       fontFamily: {
-        sans: ['Nunito', 'sans-serif'],
-        display: ['Outfit', 'sans-serif'],
+        display: ['var(--theme-font-display)', 'system-ui', 'sans-serif'],
+        body: ['var(--theme-font-body)', 'system-ui', 'sans-serif'],
       },
-      boxShadow: {
-        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
-      }
+      animation: {
+        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'float': 'float 3s ease-in-out infinite',
+        'shimmer': 'shimmer 2s linear infinite',
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-10px)' },
+        },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
+        },
+      },
     },
   },
   plugins: [],

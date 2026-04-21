@@ -1,76 +1,67 @@
-# Ecommerce Genérico
+# Ecommercevhx - Ecommerce Genérico de Ropa y Zapatillas
 
-Tienda online genérica para productos andinos/peruanos.
+Tienda online genérica con sistema de temas configurables y gestión de usuarios.
 
-## Estructura del Proyecto
+## Estructura
 
 ```
-ecommerce-generico/
-├── frontend/              # Aplicación React + Vite + Tailwind
-│   ├── src/
-│   │   ├── components/   # Componentes reutilizables
-│   │   ├── pages/        # Páginas de la aplicación
-│   │   ├── context/     # Contextos React (Auth, Cart, Wishlist)
-│   │   ├── services/    # API Service con mocks
-│   │   └── data/        # Datos mock locales
-│   ├── public/          # Archivos estáticos
-│   └── dist/            # Build de producción
+ecommercevhx/
+├── src/
+│   ├── components/        # Componentes React
+│   ├── pages/           # Páginas (rutas)
+│   ├── context/        # AuthContext, CartContext, ThemeContext
+│   ├── services/      # API service con mocks
+│   └── data/         # mockData.js (productos, usuarios)
+├── dist/             # Build de producción
+└── REPORTE.md
 ```
 
-## Scripts Disponibles
+## Scripts
 
 ```bash
-cd frontend
-
-# Development
-npm run dev          # Servidor de desarrollo (puerto 5173)
-
-# Build
-npm run build         # Build de producción
-npm run preview       # Preview del build
-
-# Testing
-npm run test          # Tests unitarios (Vitest)
-npm run test:run     # Tests sin watch
-
-# E2E (opcional)
-npm run cypress:open # Abrir Cypress
+npm run dev         # Desarrollo (5173)
+npm run build      # Production build
+npm run preview   # Preview build
+npm run test     # Tests unitarios
 ```
 
 ## Funcionalidades
 
-- Catálogo de productos con categorías
-- Carrito de compras
-- Wishlist/Listas de deseos
-- Checkout simulado
-- Sistema de-auth con roles (Admin, Moderator, Customer)
-- Dashboards para Admin, Moderator y Cliente
-- Página de contacto
-- Chat de soporte (mock)
-- Búsqueda de productos
-- Reseñas y ratings
+### Sistema de Temas (5)
+- **Minimal**: Blanco/negro, profesional
+- **Urban Dark**: Negro/neón, moderno
+- **Vintage**: Sepia/cream, nostálgico
+- **Sport**: Verde/naranja, deportivo
+- **Premium**: Negro/dorado, lujo
 
-## Usuarios de Prueba
+### Productos
+- 12 productos con imágenes Unsplash
+- Zapatillas, streetwear, deportivo, formal, accessories
+- Badges: NEW, SALE, HOT, BEST SELLER
 
-| Email | Contraseña | Rol |
-|-------|-----------|-----|
+### Usuarios y Roles
+| Email | Password | Rol |
+|-------|----------|-----|
 | admin@test.com | admin123 | ADMIN |
-| moderator@test.com | moderator123 | MODERATOR |
 | customer@test.com | customer123 | CUSTOMER |
+| moderator@test.com | moderator123 | MODERATOR |
+| inventory@test.com | inventory123 | INVENTORY |
 
-## Deployment en Netlify
+### Dashboards
+- **Admin**: Gestión usuarios, productos, pedidos
+- **Customer**: Perfil, pedidos, wishlist, direcciones
+- **Moderator**: Moderación contenido
+- **Inventory**: Gestión inventario
 
-1. Conectar repositorio a Netlify
-2. Build command: `cd frontend && npm run build`
-3. Publish directory: `frontend/dist`
-4. Redirecciones: `/* /index.html 200`
+## Deployment Netlify
+
+1. Build: `npm run build`
+2. Publish: `dist/`
+3. Redirect: `/* /index.html 200`
 
 ## Tecnologías
 
-- React 19
-- Vite 8
+- React 19 + Vite 8
 - Tailwind CSS 4
 - React Router DOM 7
-- Lucide React (iconos)
-- Vitest (tests unitarios)
-- Cypress (tests E2E)
+- Lucide React Icons
