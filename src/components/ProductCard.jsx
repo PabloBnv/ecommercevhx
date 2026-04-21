@@ -1,25 +1,33 @@
 import React, { memo, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Star } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
-import ImageWithLoader from './ImageWithLoader';
+import { useTheme } from '../context/ThemeContext';
+
+const badgeStyles = {
+  'NEW': { bg: 'bg-blue-500', text: 'text-white' },
+  'SALE': { bg: 'bg-red-500', text: 'text-white' },
+  'HOT': { bg: 'bg-orange-500', text: 'text-white' },
+  'BEST SELLER': { bg: 'bg-yellow-500', text: 'text-black' },
+};
 
 const categoryColors = {
-  'Sin TACC': 'bg-amber-100 text-amber-800',
-  'Veganos': 'bg-emerald-100 text-emerald-800',
-  'Orgánicos': 'bg-slate-100 text-slate-800',
-  'Especias': 'bg-red-100 text-red-800',
-  'Frutos Secos': 'bg-orange-100 text-orange-800',
-  'default': 'bg-gray-100 text-gray-800'
+  'sneakers': 'from-red-500 to-orange-500',
+  'streetwear': 'from-blue-500 to-cyan-500',
+  'sport': 'from-green-500 to-emerald-500',
+  'formal': 'from-purple-500 to-pink-500',
+  'accessories': 'from-yellow-500 to-amber-500',
 };
 
 const ProductCard = memo(({ product, priority = false }) => {
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { theme } = useTheme();
   const inWishlist = isInWishlist(product.id);
 
-  const badgeColor = categoryColors[product.category?.name] || categoryColors['default'];
+  const badgeClass = badgeStyles[product.badge] || { bg: 'bg-gray-500', text: 'text-white' };
+  const categoryGradient = categoryColors[product.category] || categoryColors['accessories'];
 
   const handleAddToCart = useCallback((e) => {
     e.preventDefault();
@@ -34,56 +42,163 @@ const ProductCard = memo(({ product, priority = false }) => {
   }, [toggleWishlist, product]);
 
   return (
-    <Link to={`/product/${product.id}`} className="block h-full">
-      <div className="bg-white rounded-lg shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 flex flex-col h-full" style={{ height: '100%' }}>
-        <div className="relative aspect-square overflow-hidden bg-gray-50" style={{ aspectRatio: '1/1' }}>
-          <ImageWithLoader 
-            src={product.imageUrl} 
+    <Link 
+      to={`/product/${product.id}`} 
+      className="block h-full group"
+      style={{ color: theme.colors.text }}
+    >
+      <div 
+        className="rounded-2xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 flex flex-col h-full"
+        style={{ 
+          backgroundColor: theme.colors.card,
+          border: `1px solid ${theme.colors.border}`,
+          boxShadow: `0 4px 20px ${theme.colors.bg}10`,
+        }}
+      >
+        <div className="relative aspect-square overflow-hidden bg-gray-100">
+          <img
+            src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-            priority={priority}
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading={priority ? 'eager' : 'lazy'}
+            onError={(e) => {
+              e.target.src = `https://picsum.photos/seed/product${product.id}/800/800`;
+            }}
           />
-          <span className={`absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded ${badgeColor}`}>
-            {product.category?.name || 'General'}
-          </span>
+          
+          <div 
+            className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide ${badgeClass.bg} ${badgeClass.text}`}
+          >
+            {product.badge || product.category}
+          </div>
           
           <button
             onClick={handleToggleWishlist}
-            className={`absolute top-2 right-2 p-2 rounded-full shadow-md transition-all z-10 ${
-              inWishlist 
-                ? 'bg-red-500 text-white hover:bg-red-600' 
-                : 'bg-white text-gray-400 hover:text-red-500'
-            }`}
+            className="absolute top-3 right-3 p-2 rounded-full shadow-lg transition-all z-10 hover:scale-110"
+            style={{ 
+              backgroundColor: inWishlist ? '#ef4444' : theme.colors.card,
+              color: inWishlist ? 'white' : theme.colors.textSecondary,
+            }}
             aria-label={inWishlist ? 'Quitar de favoritos' : 'Agregar a favoritos'}
           >
-            <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} aria-hidden="true" />
+            <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
           </button>
+          
+          <div 
+            className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center bg-black/40"
+          >
+            <button
+              onClick={handleAddToCart}
+              className="px-6 py-3 rounded-xl font-semibold text-sm flex items-center gap-2 hover:scale-105 transition-transform"
+              style={{
+                backgroundColor: theme.colors.accent,
+                color: theme.colors.buttonText,
+              }}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Agregar
+            </button>
+          </div>
         </div>
         
         <div className="p-4 flex flex-col flex-grow">
-          <h3 className="font-semibold text-sm text-gray-800 mb-2 leading-tight min-h-[2.5rem] line-clamp-2">
+          <div className="flex items-center gap-2 mb-2">
+            <div className={`w-4 h-4 rounded-full bg-gradient-to-br ${categoryGradient}`} />
+            <span 
+              className="text-xs font-medium uppercase tracking-wide"
+              style={{ color: theme.colors.textSecondary }}
+            >
+              {product.brand}
+            </span>
+          </div>
+          
+          <h3 
+            className="font-bold text-base md:text-lg mb-2 line-clamp-2"
+            style={{ color: theme.colors.text }}
+          >
             {product.name}
           </h3>
           
-          <p className="text-gray-500 text-xs mb-4 flex items-center gap-1">
-            {product.unit && `x ${product.unit}`}
+          <p 
+            className="text-sm line-clamp-2 mb-4"
+            style={{ color: theme.colors.textSecondary }}
+          >
+            {product.description}
           </p>
           
-          <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between gap-2">
-            <div className="flex flex-col">
-              <span className="text-xs text-gray-400">Precio</span>
-              <span className="text-lg font-bold text-slate-800">
-                ${product.price?.toLocaleString('es-AR') || '0'}
-              </span>
+          <div className="mt-auto space-y-2">
+            {product.sizes && (
+              <div className="flex flex-wrap gap-1">
+                {product.sizes.slice(0, 5).map((size) => (
+                  <span 
+                    key={size}
+                    className="px-2 py-1 text-xs rounded"
+                    style={{ 
+                      backgroundColor: theme.colors.bgSecondary,
+                      color: theme.colors.textSecondary,
+                    }}
+                  >
+                    {size}
+                  </span>
+                ))}
+                {product.sizes.length > 5 && (
+                  <span 
+                    className="px-2 py-1 text-xs rounded"
+                    style={{ 
+                      backgroundColor: theme.colors.bgSecondary,
+                      color: theme.colors.textSecondary,
+                    }}
+                  >
+                    +{product.sizes.length - 5}
+                  </span>
+                )}
+              </div>
+            )}
+            
+            <div className="flex items-center justify-between pt-3" style={{ borderTop: `1px solid ${theme.colors.border}` }}>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  <span className="text-xl font-bold" style={{ color: theme.colors.accent }}>
+                    ${product.price?.toFixed(2)}
+                  </span>
+                  {product.originalPrice && (
+                    <span 
+                      className="text-sm line-through"
+                      style={{ color: theme.colors.textSecondary }}
+                    >
+                      ${product.originalPrice?.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+                {product.originalPrice && (
+                  <span className="text-xs font-semibold text-red-500">
+                    -{Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
+                  </span>
+                )}
+              </div>
+              
+              <div className="flex items-center gap-1">
+                {[1,2,3,4,5].map((i) => (
+                  <Star 
+                    key={i}
+                    className="w-3 h-3"
+                    style={{ color: '#fbbf24', fill: '#fbbf24' }}
+                  />
+                ))}
+                <span className="text-xs" style={{ color: theme.colors.textSecondary }}>
+                  (4.5)
+                </span>
+              </div>
             </div>
             
-            <button 
-              onClick={handleAddToCart}
-              className="bg-slate-700 hover:bg-slate-800 text-white px-2 py-1.5 rounded text-xs font-bold transition-colors flex items-center gap-1 whitespace-nowrap"
-            >
-              <ShoppingCart className="w-3 h-3" aria-hidden="true" />
-              Agregar
-            </button>
+            <div className="flex items-center justify-between">
+              <span 
+                className="text-xs"
+                style={{ color: product.stock > 10 ? theme.colors.textSecondary : '#ef4444' }}
+              >
+                {product.stock > 10 ? 'En stock' : product.stock > 0 ? `Solo ${product.stock} restantes` : 'Sin stock'}
+              </span>
+            </div>
           </div>
         </div>
       </div>
