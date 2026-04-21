@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -9,36 +10,21 @@ const AuthPage = () => {
     password: '',
     firstName: '',
     lastName: '',
-    phone: '',
-    address: '',
-    city: '',
-    postalCode: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [creatingUsers, setCreatingUsers] = useState(false);
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const { theme } = useTheme();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const fillCredentials = (email, password) => {
-    setFormData({ ...formData, email, password });
-  };
-
-  const createTestUsers = async () => {
-    setCreatingUsers(true);
-    alert('Para pruebas usa:\n- admin@test.com / admin123\n- customer@test.com / customer123\n- moderator@test.com / moderator123');
-    setCreatingUsers(false);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       if (isLogin) {
         await login(formData.email, formData.password);
@@ -53,225 +39,217 @@ const AuthPage = () => {
     }
   };
 
+  const demoCredentials = [
+    { email: 'customer@test.com', password: 'customer123', role: 'Customer' },
+    { email: 'admin@test.com', password: 'admin123', role: 'Admin' },
+    { email: 'moderator@test.com', password: 'moderator123', role: 'Moderator' },
+  ];
+
+  const fillCredentials = (email, password) => {
+    setFormData({ ...formData, email, password });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-8">
+    <div 
+      className="min-h-screen flex items-center justify-center px-4 py-12"
+      style={{
+        background: `linear-gradient(135deg, ${theme.colors.accent}20 0%, ${theme.colors.bg} 50%, ${theme.colors.accent}10 100%)`,
+      }}
+    >
+      <div 
+        className="w-full max-w-md"
+        style={{
+          background: `${theme.colors.card}80`,
+          backdropFilter: 'blur(20px)',
+          border: `1px solid ${theme.colors.border}`,
+          borderRadius: '24px',
+          boxShadow: `0 25px 50px -12px ${theme.colors.accent}40`,
+        }}
+      >
+        <div className="p-8">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-800">
-              {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
+            <div className="text-4xl mb-2">🛍️</div>
+            <h1 
+              className="text-3xl font-bold"
+              style={{ color: theme.colors.text, fontFamily: theme.fonts.display }}
+            >
+              STORE
             </h1>
-            <p className="text-gray-500 mt-2">
-              {isLogin ? 'Bienvenido de vuelta' : 'Regístrate para comprar'}
+            <p style={{ color: theme.colors.textSecondary }}>
+              {isLogin ? 'Bienvenido de vuelta' : 'Crea tu cuenta'}
             </p>
           </div>
 
+          <div 
+            className="rounded-xl p-4 mb-6"
+            style={{ backgroundColor: theme.colors.accent + '15' }}
+          >
+            <p 
+              className="text-sm font-semibold mb-3 text-center"
+              style={{ color: theme.colors.accent }}
+            >
+              👇 Credenciales de Prueba
+            </p>
+            <div className="space-y-2">
+              {demoCredentials.map((cred) => (
+                <button
+                  key={cred.email}
+                  onClick={() => fillCredentials(cred.email, cred.password)}
+                  className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all hover:scale-[1.02]"
+                  style={{ 
+                    backgroundColor: theme.colors.bgSecondary,
+                    border: `1px solid ${theme.colors.border}`,
+                  }}
+                >
+                  <span style={{ color: theme.colors.text }}>
+                    <span className="font-semibold">{cred.role}:</span> {cred.email}
+                  </span>
+                  <span 
+                    className="font-mono px-2 py-1 rounded text-xs"
+                    style={{ 
+                      backgroundColor: theme.colors.accent,
+                      color: theme.colors.buttonText,
+                    }}
+                  >
+                    {cred.password}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div 
+              className="mb-4 px-4 py-3 rounded-lg text-sm"
+              style={{ 
+                backgroundColor: '#fee2e2',
+                color: '#dc2626',
+                border: '1px solid #fecaca',
+              }}
+            >
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label 
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: theme.colors.text }}
+                  >
+                    Nombre
+                  </label>
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl text-sm"
+                    style={{
+                      backgroundColor: theme.colors.bgSecondary,
+                      border: `1px solid ${theme.colors.border}`,
+                      color: theme.colors.text,
+                    }}
+                    required={!isLogin}
+                  />
+                </div>
+                <div>
+                  <label 
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: theme.colors.text }}
+                  >
+                    Apellido
+                  </label>
+                  <input
+                    type="text"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 rounded-xl text-sm"
+                    style={{
+                      backgroundColor: theme.colors.bgSecondary,
+                      border: `1px solid ${theme.colors.border}`,
+                      color: theme.colors.text,
+                    }}
+                    required={!isLogin}
+                  />
+                </div>
+              </div>
+            )}
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: theme.colors.text }}
+              >
+                Email
+              </label>
               <input
                 type="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                className="w-full px-4 py-3 rounded-xl text-sm"
+                style={{
+                  backgroundColor: theme.colors.bgSecondary,
+                  border: `1px solid ${theme.colors.border}`,
+                  color: theme.colors.text,
+                }}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: theme.colors.text }}
+              >
+                Contraseña
+              </label>
               <input
                 type="password"
                 name="password"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
+                className="w-full px-4 py-3 rounded-xl text-sm"
+                style={{
+                  backgroundColor: theme.colors.bgSecondary,
+                  border: `1px solid ${theme.colors.border}`,
+                  color: theme.colors.text,
+                }}
                 required
                 minLength={6}
               />
             </div>
 
-            {!isLogin && (
-              <>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nombre</label>
-                    <input
-                      type="text"
-                      name="firstName"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Apellido</label>
-                    <input
-                      type="text"
-                      name="lastName"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Código Postal</label>
-                    <input
-                      type="text"
-                      name="postalCode"
-                      value={formData.postalCode}
-                      onChange={handleChange}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-slate-500 focus:border-slate-500"
-                    />
-                  </div>
-                </div>
-              </>
-            )}
-
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-slate-600 text-white font-bold py-3 rounded-lg hover:bg-slate-700 transition-colors disabled:opacity-50"
+              className="w-full py-4 rounded-xl font-semibold text-lg transition-all hover:scale-[1.02] hover:shadow-lg"
+              style={{
+                backgroundColor: theme.colors.accent,
+                color: theme.colors.buttonText,
+                opacity: loading ? 0.7 : 1,
+              }}
             >
-              {loading ? 'Cargando...' : (isLogin ? 'Ingresar' : 'Registrarse')}
+              {loading ? 'Cargando...' : isLogin ? 'Iniciar Sesión' : 'Crear Cuenta'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <button
               onClick={() => setIsLogin(!isLogin)}
-              className="text-slate-600 hover:underline"
+              className="text-sm transition-colors hover:underline"
+              style={{ color: theme.colors.accent }}
             >
-              {isLogin ? '¿No tienes cuenta? Regístrate' : '¿Ya tienes cuenta? Inicia sesión'}
+              {isLogin 
+                ? '¿No tienes cuenta? Regístrate' 
+                : '¿Ya tienes cuenta? Inicia sesión'}
             </button>
           </div>
         </div>
-        
-        {isLogin && (
-          <div className="mt-8 border-2 border-yellow-400 rounded-xl p-5 bg-gradient-to-r from-yellow-50 to-orange-50">
-            <div className="flex items-center justify-center gap-3 mb-4">
-              <span className="bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wide">ESTADO DE PRUEBA</span>
-              <p className="text-base font-bold text-yellow-800">Hacé clic para autocompletar:</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div 
-                onClick={() => fillCredentials('cliente@test.com', 'cliente123')}
-                className="bg-white rounded-xl p-3 shadow-sm border-l-4 border-blue-500 cursor-pointer hover:bg-blue-50 hover:scale-105 transition-all"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">👤</span>
-                  <p className="font-bold text-gray-800">Cliente</p>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Email:</span>
-                    <code className="font-mono text-blue-700 bg-white px-1 rounded text-[10px]">cliente@test.com</code>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Pass:</span>
-                    <code className="font-mono text-slate-700 bg-white px-1 rounded text-[10px]">cliente123</code>
-                  </div>
-                </div>
-              </div>
-              
-              <div 
-                onClick={() => fillCredentials('inventario@test.com', 'inventario123')}
-                className="bg-white rounded-xl p-3 shadow-sm border-l-4 border-slate-500 cursor-pointer hover:bg-slate-50 hover:scale-105 transition-all"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">📦</span>
-                  <p className="font-bold text-gray-800">Encargado Inv.</p>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Email:</span>
-                    <code className="font-mono text-blue-700 bg-white px-1 rounded text-[10px]">vendedor@test.com</code>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Pass:</span>
-                    <code className="font-mono text-slate-700 bg-white px-1 rounded text-[10px]">vendedor123</code>
-                  </div>
-                </div>
-              </div>
-              
-              <div 
-                onClick={() => fillCredentials('moderador@test.com', 'moderador123')}
-                className="bg-white rounded-xl p-3 shadow-sm border-l-4 border-purple-500 cursor-pointer hover:bg-purple-50 hover:scale-105 transition-all"
-              >
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">👮</span>
-                  <p className="font-bold text-gray-800">Moderador</p>
-                </div>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Email:</span>
-                    <code className="font-mono text-blue-700 bg-white px-1 rounded text-[10px]">moderador@test.com</code>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600">Pass:</span>
-                    <code className="font-mono text-slate-700 bg-white px-1 rounded text-[10px]">moderador123</code>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="mt-4 text-center">
-              <p className="text-xs text-yellow-700 font-medium">🔒 El usuario admin no se muestra públicamente por seguridad</p>
-              <button
-                onClick={createTestUsers}
-                disabled={creatingUsers}
-                className="mt-3 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50 text-sm font-medium"
-              >
-                {creatingUsers ? 'Creando...' : '🔧 Crear usuarios de prueba'}
-              </button>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
