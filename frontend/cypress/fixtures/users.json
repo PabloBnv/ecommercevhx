@@ -1,0 +1,28 @@
+{
+  "customer": {
+    "email": "customer@test.com",
+    "password": "Test123!",
+    "firstName": "Test",
+    "lastName": "Customer",
+    "phone": "1122334455",
+    "address": "Av. Test 1234",
+    "city": "CABA",
+    "postalCode": "1234"
+  },
+  "admin": {
+    "email": "admin@test.com",
+    "password": "Admin123!",
+    "firstName": "Admin",
+    "lastName": "User"
+  },
+  "newUser": {
+    "email": "newuser@test.com",
+    "password": "NewUser123!",
+    "firstName": "New",
+    "lastName": "User",
+    "phone": "1199887766",
+    "address": "Calle Nueva 456",
+    "city": "CABA",
+    "postalCode": "5678"
+  }
+}

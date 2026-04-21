@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Ecommerce Template - Your online store. Quality products, secure checkout, and great customer service." />
+    <meta name="theme-color" content="#15803d" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    
+    <!-- Preconnect to critical domains -->
+    <link rel="preconnect" href="https://api.yourdomain.com" />
+    <link rel="dns-prefetch" href="https://api.yourdomain.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- Critical fonts - display=optional eliminates CLS (font only used if cached) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=optional" as="style" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=optional" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=optional" /></noscript>
+    
+    <!-- Inline critical CSS -->
+    <style>
+      *,*::before,*::after{box-sizing:border-box}
+      body{font-family:'Nunito',sans-serif;margin:0;background:#f9fafb;color:#1f2937}
+      .navbar{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.1);position:sticky;top:0;z-index:50}
+      .container{max-width:1280px;margin:0 auto;padding:0 1rem}
+      .btn-primary{background:#15803d;color:#fff;padding:.5rem 1rem;border-radius:.5rem;font-weight:600}
+      .btn-primary:hover{background:#166534}
+      .spinner{width:40px;height:40px;border:3px solid #e5e7eb;border-top-color:#15803d;border-radius:50%;animation:spin 1s linear infinite;margin:100px auto}
+      @keyframes spin{to{transform:rotate(360deg)}}
+      .hero{background:linear-gradient(to right,#15803d,#16a34a);color:#fff;padding:3rem 1rem;text-align:center}
+      .hero h1{font-size:1.875rem;font-weight:700;margin:0 0 .75rem}
+      @media(min-width:768px){.hero h1{font-size:2.25rem}}
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="spinner" role="status" aria-label="Cargando"></div>
+    </div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

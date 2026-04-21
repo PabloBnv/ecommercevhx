@@ -1,0 +1,16 @@
+{
+  "categories": [
+    "Sin TACC",
+    "Veganos",
+    "Orgánicos",
+    "Especias",
+    "Frutos Secos"
+  ],
+  "testProduct": {
+    "name": "Producto Test",
+    "description": "Producto para pruebas E2E",
+    "price": 999.99,
+    "unit": "kg",
+    "stock": 100
+  }
+}
