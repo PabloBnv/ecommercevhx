@@ -253,9 +253,10 @@ const AppContent = () => {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/favoritos" element={<WishlistPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
-            <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
             <Route path="/dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
             <Route path="/pedidos" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
+            <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
             <Route path="/order/:id" element={<OrderTrackingPage />} />
             <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
