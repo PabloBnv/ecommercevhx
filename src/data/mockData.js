@@ -347,7 +347,28 @@ export const loyaltyTiers = [
   { name: 'Platinum', min: 10000, discount: 15 },
 ];
 
-export const heroVideo = 'https://cdn.coverr.co/videos/coverr-walking-in-fashion-store-5394/1080p.mp4';
+export const heroSlides = [
+  {
+    image: 'https://picsum.photos/seed/fashion1/1920/1080',
+    title: 'Nueva Colección',
+    subtitle: 'Hasta 30% OFF',
+  },
+  {
+    image: 'https://picsum.photos/seed/fashion2/1920/1080',
+    title: 'Streetwear',
+    subtitle: 'Los mejores looks urbanos',
+  },
+  {
+    image: 'https://picsum.photos/seed/fashion3/1920/1080',
+    title: 'Zapatillas',
+    subtitle: 'Las trendias del año',
+  },
+  {
+    image: 'https://picsum.photos/seed/fashion4/1920/1080',
+    title: 'Premium Quality',
+    subtitle: 'Envío gratis +$50',
+  },
+];
 
 export const promoBanners = [
   { text: '🎉 Nueva colección 2026 - Hasta 30% OFF', link: '/' },

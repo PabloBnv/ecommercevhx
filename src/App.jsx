@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { useState, Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -8,7 +8,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProductGrid from './components/ProductGrid';
 import FeaturedProducts from './components/FeaturedProducts';
-import { heroVideo, promoBanners } from './data/mockData';
+import { heroSlides, promoBanners } from './data/mockData';
 
 const CartModal = lazy(() => import('./components/CartModal'));
 const AuthPage = lazy(() => import('./pages/AuthPage'));
@@ -56,30 +56,38 @@ const AnnouncementBar = () => {
 
 const HeroSection = () => {
   const { theme } = useTheme();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+  
+  const slide = heroSlides[currentSlide];
   
   return (
     <div className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover"
-        poster="https://picsum.photos/seed/fashion-hero/1920/1080"
-      >
-        <source src={heroVideo} type="video/mp4" />
-      </video>
+      <div className="absolute inset-0">
+        <img
+          src={slide.image}
+          alt={slide.title}
+          className="w-full h-full object-cover transition-opacity duration-1000"
+        />
+      </div>
       
       <div 
-        className="absolute inset-0"
+        className="absolute inset-0 transition-opacity duration-700"
         style={{
-          background: `linear-gradient(180deg, ${theme.colors.bg}cc 0%, ${theme.colors.bg}80 50%, ${theme.colors.bg}ee 100%)`,
+          background: `linear-gradient(180deg, ${theme.colors.bg}dd 0%, ${theme.colors.bg}99 40%, ${theme.colors.bg}dd 100%)`,
+          opacity: 0.85,
         }}
       />
       
       <div className="relative z-10 max-w-6xl mx-auto px-4 text-center">
-        <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 animate-bounce" style={{ backgroundColor: theme.colors.accent, color: theme.colors.buttonText }}>
-          Nueva Temporada
+        <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4" style={{ backgroundColor: theme.colors.accent, color: theme.colors.buttonText }}>
+          {slide.subtitle}
         </div>
         
         <h1 
@@ -90,7 +98,7 @@ const HeroSection = () => {
             textShadow: `0 0 60px ${theme.colors.accent}40`,
           }}
         >
-          STORE
+          {slide.title}
         </h1>
         
         <p 
@@ -130,6 +138,20 @@ const HeroSection = () => {
       <div className="absolute bottom-0 left-0 right-0 h-24" style={{
         background: `linear-gradient(transparent, var(--theme-bg))`,
       }} />
+      
+      <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-2">
+        {heroSlides.map((_, idx) => (
+          <button
+            key={idx}
+            onClick={() => setCurrentSlide(idx)}
+            className="w-3 h-3 rounded-full transition-all"
+            style={{
+              backgroundColor: currentSlide === idx ? theme.colors.accent : theme.colors.bg + '80',
+              border: `2px solid ${theme.colors.border}`,
+            }}
+          />
+        ))}
+      </div>
     </div>
   );
 };
