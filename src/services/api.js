@@ -120,8 +120,48 @@ class ApiService {
         firstName: u.firstName,
         lastName: u.lastName,
         role: u.role,
-        enabled: true,
+        status: u.status || 'ACTIVE',
+        enabled: u.status !== 'SUSPENDED' && u.status !== 'BANNED',
       }));
+    }
+    if (endpoint.startsWith('/api/admin/users/') && endpoint.includes('/role') && method === 'PUT') {
+      const userId = parseInt(endpoint.split('/')[4]);
+      const user = users.find((u) => u.id === userId);
+      if (user && body?.role) {
+        user.role = body.role;
+      }
+      return { success: true };
+    }
+    if (endpoint.startsWith('/api/admin/users/') && endpoint.includes('/status') && method === 'PUT') {
+      const userId = parseInt(endpoint.split('/')[4]);
+      const user = users.find((u) => u.id === userId);
+      if (user) {
+        user.status = body?.enabled ? 'ACTIVE' : 'SUSPENDED';
+      }
+      return { success: true };
+    }
+    if (endpoint === '/api/admin/users' && method === 'POST') {
+      const newUser = {
+        id: users.length + 1,
+        email: body.email,
+        password: body.password || 'password123',
+        firstName: body.firstName,
+        lastName: body.lastName,
+        role: body.role || 'CUSTOMER',
+        status: 'ACTIVE',
+        createdAt: new Date().toISOString(),
+        lastLogin: null,
+      };
+      users.push(newUser);
+      return { id: newUser.id, email: newUser.email };
+    }
+    if (endpoint.startsWith('/api/admin/users/') && method === 'DELETE') {
+      const userId = parseInt(endpoint.split('/')[4]);
+      const idx = users.findIndex((u) => u.id === userId);
+      if (idx >= 0) {
+        users.splice(idx, 1);
+      }
+      return { success: true };
     }
     if (endpoint.startsWith('/api/admin/users/') && endpoint.includes('/role') && method === 'PUT') {
       return { success: true };

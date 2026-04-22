@@ -1,103 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, ShoppingCart, Heart, ArrowLeft, Trash2 } from 'lucide-react';
+import { Star, ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAuth } from '../context/AuthContext';
-import { API_URL } from '../services/api';
+import { useTheme } from '../context/ThemeContext';
+import { products as allProducts } from '../data/mockData';
 
-const Reviews = ({ productId }) => {
+const mockReviews = [
+  { id: 1, userId: 2, userFirstName: 'Juan', userLastName: 'Pérez', rating: 5, comment: 'Excelente producto, muy buena calidad!', createdAt: '2026-04-15T10:00:00Z' },
+  { id: 2, userId: 3, userFirstName: 'María', userLastName: 'García', rating: 4, comment: 'Muy bueno, llegó rápido.', createdAt: '2026-04-10T15:30:00Z' },
+  { id: 3, userId: 4, userFirstName: 'Carlos', userLastName: 'López', rating: 5, comment: ' recomiendo totalmente', createdAt: '2026-04-05T09:20:00Z' },
+];
+
+const Reviews = ({ productId, theme }) => {
   const { user } = useAuth();
-  const [reviews, setReviews] = useState([]);
-  const [stats, setStats] = useState({ averageRating: 0, reviewCount: 0 });
+  const [reviews] = useState(mockReviews.filter(r => r.id));
+  const [stats] = useState({ averageRating: 4.5, reviewCount: 3 });
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  const fetchReviews = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/reviews/product/${productId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setReviews(data);
-      }
-    } catch (err) {
-      console.error('Error fetching reviews:', err);
-    }
-  };
-
-  const fetchStats = async () => {
-    try {
-      const res = await fetch(`${API_URL}/api/reviews/product/${productId}/stats`);
-      if (res.ok) {
-        const data = await res.json();
-        setStats(data);
-      }
-    } catch (err) {
-      console.error('Error fetching stats:', err);
-    }
-  };
-
-  useEffect(() => {
-    fetchReviews();
-    fetchStats();
-  }, [productId]);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!user) {
-      setError('Debes iniciar sesión para dejar una reseña');
-      return;
-    }
-
-    setLoading(true);
-    setError('');
-
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/reviews`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ rating, comment, productId })
-      });
-
-      if (res.ok) {
-        setComment('');
-        setRating(5);
-        fetchReviews();
-        fetchStats();
-      } else {
-        const data = await res.json();
-        setError(data.error || 'Error al enviar reseña');
-      }
-    } catch (err) {
-      setError('Error al enviar reseña');
-    }
-    setLoading(false);
-  };
-
-  const handleDelete = async (reviewId) => {
-    if (!confirm('¿Eliminar esta reseña?')) return;
-
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${API_URL}/api/reviews/${reviewId}`, {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      if (res.ok) {
-        fetchReviews();
-        fetchStats();
-      }
-    } catch (err) {
-      console.error('Error deleting review:', err);
-    }
-  };
+  const [submitted, setSubmitted] = useState(false);
 
   const renderStars = (count, interactive = false, currentRating = 0) => {
     return [...Array(5)].map((_, i) => (
@@ -112,32 +36,52 @@ const Reviews = ({ productId }) => {
     ));
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!user) {
+      setError('Debes iniciar sesión para dejar una reseña');
+      return;
+    }
+    setLoading(true);
+    setTimeout(() => {
+      setSubmitted(true);
+      setComment('');
+      setRating(5);
+      setLoading(false);
+    }, 1000);
+  };
+
   return (
     <div className="mt-8">
       <div className="flex items-center gap-4 mb-6">
         <div className="flex items-center gap-2">
           {renderStars(Math.round(stats.averageRating || 0))}
-          <span className="text-gray-600">
+          <span style={{ color: theme.colors.textSecondary }}>
             {stats.averageRating ? stats.averageRating.toFixed(1) : '0'} ({stats.reviewCount} reseñas)
           </span>
         </div>
       </div>
 
-      {user && (
-        <form onSubmit={handleSubmit} className="bg-gray-50 p-4 rounded-lg mb-6">
-          <h3 className="font-semibold mb-3">Deja tu reseña</h3>
-          {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+      {user ? (
+        <form onSubmit={handleSubmit} className="p-4 rounded-lg mb-6" style={{ backgroundColor: theme.colors.bgSecondary }}>
+          <h3 className="font-semibold mb-3" style={{ color: theme.colors.text }}>Deja tu reseña</h3>
+          {error && <p style={{ color: '#dc2626', fontSize: '0.875rem', marginBottom: '0.5rem' }}>{error}</p>}
           
           <div className="flex items-center gap-1 mb-3">
-            <span className="text-sm mr-2">Tu calificación:</span>
+            <span className="text-sm mr-2" style={{ color: theme.colors.text }}>Tu calificación:</span>
             {renderStars(5, true, rating)}
           </div>
+          
+          {submitted && (
+            <p style={{ color: '#22c55e', marginBottom: '0.5rem' }}>¡Gracias por tu reseña!</p>
+          )}
           
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Escribe tu comentario (opcional)"
-            className="w-full p-2 border rounded mb-3"
+            className="w-full p-2 rounded mb-3"
+            style={{ backgroundColor: theme.colors.card, color: theme.colors.text, border: '1px solid ' + theme.colors.border }}
             rows={3}
             maxLength={500}
           />
@@ -145,39 +89,33 @@ const Reviews = ({ productId }) => {
           <button
             type="submit"
             disabled={loading}
-            className="bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-700 disabled:opacity-50"
+            className="px-4 py-2 rounded font-medium transition-colors disabled:opacity-50"
+            style={{ backgroundColor: theme.colors.button, color: theme.colors.buttonText }}
           >
             {loading ? 'Enviando...' : 'Enviar Reseña'}
           </button>
         </form>
-      )}
-
-      {!user && (
-        <p className="text-gray-500 mb-4">
-          <Link to="/auth" className="text-slate-600 hover:underline">Inicia sesión</Link> para dejar una reseña
+      ) : (
+        <p style={{ color: theme.colors.textSecondary, marginBottom: '1rem' }}>
+          <Link to="/auth" style={{ color: theme.colors.accent }}>Inicia sesión</Link> para dejar una reseña
         </p>
       )}
 
       <div className="space-y-4">
         {reviews.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">Aún no hay reseñas. ¡Sé el primero!</p>
+          <p style={{ color: theme.colors.textSecondary, textAlign: 'center', padding: '1rem' }}>Aún no hay reseñas. ¡Sé el primero!</p>
         ) : (
           reviews.map((review) => (
-            <div key={review.id} className="border-b pb-4">
+            <div key={review.id} className="pb-4" style={{ borderBottom: '1px solid ' + theme.colors.border }}>
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <span className="font-medium">{review.userFirstName} {review.userLastName}</span>
-                  <span className="text-gray-400">•</span>
+                  <span className="font-medium" style={{ color: theme.colors.text }}>{review.userFirstName} {review.userLastName}</span>
+                  <span style={{ color: theme.colors.textSecondary }}>•</span>
                   <div className="flex">{renderStars(review.rating)}</div>
                 </div>
-                {(user?.id === review.userId || user?.role === 'ADMIN') && (
-                  <button onClick={() => handleDelete(review.id)} className="text-gray-400 hover:text-red-500">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                )}
               </div>
-              {review.comment && <p className="text-gray-600">{review.comment}</p>}
-              <p className="text-xs text-gray-400 mt-1">
+              {review.comment && <p style={{ color: theme.colors.textSecondary }}>{review.comment}</p>}
+              <p className="text-xs mt-1" style={{ color: theme.colors.textSecondary }}>
                 {new Date(review.createdAt).toLocaleDateString('es-AR')}
               </p>
             </div>
@@ -192,93 +130,115 @@ const ProductDetailPage = () => {
   const { id } = useParams();
   const { addToCart } = useCart();
   const { isInWishlist, toggleWishlist } = useWishlist();
+  const { theme } = useTheme();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
-    const fetchProduct = async () => {
-      try {
-        const res = await fetch(`${API_URL}/api/products/${id}`);
-        if (res.ok) {
-          const data = await res.json();
-          setProduct(data);
-        }
-      } catch (err) {
-        console.error('Error:', err);
-      }
-      setLoading(false);
-    };
-    fetchProduct();
+    const found = allProducts.find(p => p.id === parseInt(id));
+    setProduct(found || null);
+    setLoading(false);
   }, [id]);
 
-  if (loading) return <div className="text-center py-20">Cargando...</div>;
-  if (!product) return <div className="text-center py-20">Producto no encontrado</div>;
+  if (loading) return <div className="text-center py-20" style={{ color: theme.colors.text }}>Cargando...</div>;
+  if (!product) return <div className="text-center py-20" style={{ color: theme.colors.text }}>Producto no encontrado</div>;
 
   const inWishlist = isInWishlist(product.id);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <Link to="/" className="flex items-center gap-2 text-gray-600 hover:text-slate-600 mb-6">
+      <Link to="/" className="flex items-center gap-2 mb-6" style={{ color: theme.colors.textSecondary }}>
         <ArrowLeft className="w-4 h-4" /> Volver a productos
       </Link>
 
       <div className="grid md:grid-cols-2 gap-8">
-        <div className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+        <div className="relative aspect-square rounded-lg overflow-hidden" style={{ backgroundColor: theme.colors.bgSecondary }}>
           <img
-            src={product.imageUrl || 'https://via.placeholder.com/500'}
+            src={product.image}
             alt={product.name}
             className="w-full h-full object-cover rounded-lg shadow-lg"
             loading="lazy"
-            decoding="async"
-            width="500"
-            height="500"
+            onError={(e) => { e.target.src = 'https://picsum.photos/seed/product' + product.id + '/500/500'; }}
           />
           <button
             onClick={() => toggleWishlist(product)}
-            className={`absolute top-4 right-4 p-3 rounded-full shadow-lg transition-all ${
-              inWishlist ? 'bg-red-500 text-white' : 'bg-white text-gray-400 hover:text-red-500'
-            }`}
+            className="absolute top-4 right-4 p-3 rounded-full shadow-lg transition-all"
+            style={{ backgroundColor: inWishlist ? '#ef4444' : theme.colors.card, color: inWishlist ? 'white' : theme.colors.textSecondary }}
           >
             <Heart className={`w-6 h-6 ${inWishlist ? 'fill-current' : ''}`} />
           </button>
         </div>
 
         <div>
-          <span className="text-sm text-slate-600 font-medium">
-            {product.category?.name || 'Sin categoría'}
+          <span className="text-sm font-medium" style={{ color: theme.colors.accent }}>
+            {product.brand} • {product.category}
           </span>
-          <h1 className="text-3xl font-bold mt-2 mb-2">{product.name}</h1>
-          <p className="text-2xl font-bold text-slate-600 mb-4">
-            ${product.price?.toLocaleString('es-AR')}
-            {product.unit && <span className="text-sm font-normal text-gray-500 ml-1">/ {product.unit}</span>}
-          </p>
+          <h1 className="text-3xl font-bold mt-2 mb-2" style={{ color: theme.colors.text }}>{product.name}</h1>
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-2xl font-bold" style={{ color: theme.colors.accent }}>
+              ${product.price?.toFixed(2)}
+            </span>
+            {product.originalPrice && (
+              <span className="text-lg line-through" style={{ color: theme.colors.textSecondary }}>
+                ${product.originalPrice?.toFixed(2)}
+              </span>
+            )}
+            {product.originalPrice && (
+              <span className="px-2 py-1 rounded text-xs font-bold text-white" style={{ backgroundColor: '#ef4444' }}>
+                -{Math.round((1 - product.price / product.originalPrice) * 100)}% OFF
+              </span>
+            )}
+          </div>
           
           {product.description && (
-            <p className="text-gray-600 mb-6">{product.description}</p>
+            <p className="mb-6" style={{ color: theme.colors.textSecondary }}>{product.description}</p>
+          )}
+
+          {product.sizes && (
+            <div className="mb-4">
+              <span className="text-sm font-medium mb-2 block" style={{ color: theme.colors.text }}>Tallas:</span>
+              <div className="flex flex-wrap gap-2">
+                {product.sizes.map(size => (
+                  <button
+                    key={size}
+                    className="px-3 py-1 rounded text-sm"
+                    style={{ backgroundColor: theme.colors.bgSecondary, color: theme.colors.text, border: '1px solid ' + theme.colors.border }}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           <div className="flex items-center gap-4 mb-6">
-            <div className="flex items-center border rounded">
+            <div className="flex items-center border rounded" style={{ borderColor: theme.colors.border }}>
               <button
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="px-3 py-2 hover:bg-gray-100"
+                className="px-4 py-2"
+                style={{ color: theme.colors.text }}
               >
                 -
               </button>
-              <span className="px-4">{quantity}</span>
+              <span className="px-4" style={{ color: theme.colors.text }}>{quantity}</span>
               <button
                 onClick={() => setQuantity(quantity + 1)}
-                className="px-3 py-2 hover:bg-gray-100"
+                className="px-4 py-2"
+                style={{ color: theme.colors.text }}
               >
                 +
               </button>
             </div>
+            <span style={{ color: theme.colors.textSecondary }}>
+              {product.stock > 10 ? 'En stock' : product.stock > 0 ? `Solo ${product.stock} restantes` : 'Sin stock'}
+            </span>
           </div>
 
           <button
             onClick={() => addToCart(product, quantity)}
-            className="w-full bg-slate-600 text-white py-3 rounded-lg font-semibold hover:bg-slate-700 flex items-center justify-center gap-2"
+            className="w-full py-3 rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
+            style={{ backgroundColor: theme.colors.button, color: theme.colors.buttonText }}
           >
             <ShoppingCart className="w-5 h-5" />
             Agregar al Carrito
@@ -286,7 +246,7 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
-      <Reviews productId={product.id} />
+      <Reviews productId={product.id} theme={theme} />
     </div>
   );
 };
