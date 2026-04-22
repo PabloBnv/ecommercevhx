@@ -1,4 +1,4 @@
-import React, { useState, Suspense, lazy, useEffect } from 'react';
+import React, { useState, Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -30,12 +30,46 @@ const PageFallback = () => (
   </div>
 );
 
-const ProtectedRoute = ({ children }) => {
+// Protected routes for different roles
+const ProtectedRoute = ({ children, allowedRoles }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div>Cargando...</div>;
-  if (!user) return <Navigate to="/auth" />;
+  const { theme } = useTheme();
+  
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="animate-spin rounded-full h-10 w-10 border-4" style={{ borderColor: theme?.colors?.accent || '#6366f1', borderTopColor: 'transparent' }}></div>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return <Navigate to="/auth" />;
+  }
+  
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <div className="text-center p-8 rounded-2xl" style={{ backgroundColor: theme?.colors?.card, border: `1px solid ${theme?.colors?.border}` }}>
+          <h1 className="text-2xl font-bold mb-4" style={{ color: theme?.colors?.text }}>Acceso Denegado</h1>
+          <p style={{ color: theme?.colors?.textSecondary }}>No tienes permisos para acceder a esta sección.</p>
+          <p className="mt-2 text-sm" style={{ color: theme?.colors?.textSecondary }}>Tu rol: {user.role}</p>
+          <Navigate to="/" />
+        </div>
+      </div>
+    );
+  }
+  
   return children;
 };
+
+const AdminOnlyRoute = ({ children }) => (
+  <ProtectedRoute allowedRoles={['ADMIN']}>{children}</ProtectedRoute>
+);
+
+const StaffRoute = ({ children }) => (
+  <ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR', 'INVENTORY']}>{children}</ProtectedRoute>
+);
 
 const AnnouncementBar = () => {
   const { theme } = useTheme();
@@ -45,11 +79,11 @@ const AnnouncementBar = () => {
     <div 
       className="py-3 text-center text-sm font-semibold transition-all"
       style={{ 
-        backgroundColor: theme.colors.accent, 
-        color: theme.colors.buttonText 
+        backgroundColor: theme?.colors?.accent || '#6366f1', 
+        color: theme?.colors?.buttonText || '#fff' 
       }}
     >
-      <span className="animate-pulse">{promoBanners[currentIdx].text}</span>
+      <span className="animate-pulse">{promoBanners[currentIdx]?.text || '¡Nueva colección!'}</span>
     </div>
   );
 };
@@ -58,21 +92,14 @@ const HeroSection = () => {
   const { theme } = useTheme();
   const [currentSlide, setCurrentSlide] = useState(0);
   
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-  
-  const slide = heroSlides[currentSlide];
+  const slide = heroSlides[currentSlide] || heroSlides[0];
   
   return (
     <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
         <img
-          src={slide.image}
-          alt={slide.title}
+          src={slide?.image || 'https://picsum.photos/seed/fashion1/1920/1080'}
+          alt={slide?.title || 'Fashion'}
           className="w-full h-full object-cover transition-opacity duration-1000"
         />
       </div>
@@ -80,33 +107,31 @@ const HeroSection = () => {
       <div 
         className="absolute inset-0 transition-opacity duration-700"
         style={{
-          background: `linear-gradient(180deg, ${theme.colors.bg}dd 0%, ${theme.colors.bg}99 40%, ${theme.colors.bg}dd 100%)`,
+          background: `linear-gradient(180deg, ${theme?.colors?.bg}dd 0%, ${theme?.colors?.bg}99 40%, ${theme?.colors?.bg}dd 100%)`,
           opacity: 0.85,
         }}
       />
       
       <div className="relative z-10 max-w-6xl mx-auto px-4 text-center py-8">
-        <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4" style={{ backgroundColor: theme.colors.accent, color: theme.colors.buttonText }}>
-          {slide.subtitle}
+        <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4" style={{ backgroundColor: theme?.colors?.accent, color: theme?.colors?.buttonText }}>
+          {slide?.subtitle || 'Nueva Temporada'}
         </div>
         
         <h1 
           className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 tracking-tight"
           style={{ 
-            color: theme.colors.text,
-            fontFamily: theme.fonts.display,
-            textShadow: `0 0 60px ${theme.colors.accent}40`,
+            color: theme?.colors?.text,
+            fontFamily: theme?.fonts?.display,
           }}
         >
-          {slide.title}
+          {slide?.title || 'STORE'}
         </h1>
         
         <p 
           className="text-base md:text-lg max-w-xl mx-auto mb-6"
-          style={{ color: theme.colors.textSecondary }}
+          style={{ color: theme?.colors?.textSecondary }}
         >
-          Las mejores tendencias en moda urbana y zapatillas. 
-          Calidad premium, precios accesibles.
+          Las mejores tendencias en moda urbana y zapatillas.
         </p>
         
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -114,9 +139,8 @@ const HeroSection = () => {
             href="#productos"
             className="px-8 py-3 rounded-xl font-semibold text-base transition-all hover:scale-105"
             style={{
-              backgroundColor: theme.colors.accent,
-              color: theme.colors.buttonText,
-              boxShadow: `0 10px 30px ${theme.colors.accent}40`,
+              backgroundColor: theme?.colors?.accent,
+              color: theme?.colors?.buttonText,
             }}
           >
             Ver Colección
@@ -126,8 +150,8 @@ const HeroSection = () => {
             className="px-8 py-3 rounded-xl font-semibold text-base transition-all hover:scale-105"
             style={{
               backgroundColor: 'transparent',
-              color: theme.colors.text,
-              border: `2px solid ${theme.colors.border}`,
+              color: theme?.colors?.text,
+              border: `2px solid ${theme?.colors?.border}`,
             }}
           >
             Explorar
@@ -135,19 +159,15 @@ const HeroSection = () => {
         </div>
       </div>
       
-      <div className="absolute bottom-0 left-0 right-0 h-24" style={{
-        background: `linear-gradient(transparent, var(--theme-bg))`,
-      }} />
-      
       <div className="absolute bottom-8 left-0 right-0 z-20 flex justify-center gap-2">
-        {heroSlides.map((_, idx) => (
+        {(heroSlides || []).map((_, idx) => (
           <button
             key={idx}
             onClick={() => setCurrentSlide(idx)}
             className="w-3 h-3 rounded-full transition-all"
             style={{
-              backgroundColor: currentSlide === idx ? theme.colors.accent : theme.colors.bg + '80',
-              border: `2px solid ${theme.colors.border}`,
+              backgroundColor: currentSlide === idx ? theme?.colors?.accent : theme?.colors?.bg + '80',
+              border: `2px solid ${theme?.colors?.border}`,
             }}
           />
         ))}
@@ -168,22 +188,22 @@ const CategoriesSection = () => {
   ];
   
   return (
-    <div id="categorias" className="max-w-7xl mx-auto px-4 py-16">
-      <h2 className="text-3xl md:text-4xl font-bold text-center mb-10" style={{ color: theme.colors.text }}>
+    <div id="categorias" className="max-w-7xl mx-auto px-4 py-12">
+      <h2 className="text-3xl md:text-4xl font-bold text-center mb-8" style={{ color: theme?.colors?.text }}>
         Categorías
       </h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {categories.map((cat, idx) => (
+        {categories.map((cat) => (
           <a
             key={cat.name}
             href={`/?category=${cat.name.toLowerCase()}`}
-            className="group relative overflow-hidden rounded-2xl aspect-square transition-all hover:scale-105 hover:shadow-2xl"
-            style={{ backgroundColor: theme.colors.card }}
+            className="group relative overflow-hidden rounded-2xl aspect-square transition-all hover:scale-105 hover:shadow-xl"
+            style={{ backgroundColor: theme?.colors?.card }}
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${cat.bg} opacity-20 group-hover:opacity-30 transition-opacity`} />
+            <div className={`absolute inset-0 bg-gradient-to-br ${cat.bg} opacity-20`} />
             <div className="relative flex flex-col items-center justify-center h-full p-4">
-              <span className="text-5xl mb-3 transform group-hover:scale-125 transition-transform">{cat.emoji}</span>
-              <span className="font-bold text-lg" style={{ color: theme.colors.text }}>{cat.name}</span>
+              <span className="text-4xl mb-2 transform group-hover:scale-125 transition-transform">{cat.emoji}</span>
+              <span className="font-bold" style={{ color: theme?.colors?.text }}>{cat.name}</span>
             </div>
           </a>
         ))}
@@ -203,14 +223,14 @@ const FeaturesSection = () => {
   ];
   
   return (
-    <div className="py-16" style={{ backgroundColor: theme.colors.bgSecondary }}>
+    <div className="py-12" style={{ backgroundColor: theme?.colors?.bgSecondary }}>
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {features.map((feature, idx) => (
-            <div key={idx} className="text-center group">
-              <div className="text-4xl mb-2 transform group-hover:scale-125 transition-transform">{feature.icon}</div>
-              <div className="font-bold text-lg" style={{ color: theme.colors.text }}>{feature.title}</div>
-              <div className="text-sm" style={{ color: theme.colors.textSecondary }}>{feature.desc}</div>
+            <div key={idx} className="text-center">
+              <div className="text-3xl mb-1">{feature.icon}</div>
+              <div className="font-semibold" style={{ color: theme?.colors?.text }}>{feature.title}</div>
+              <div className="text-sm" style={{ color: theme?.colors?.textSecondary }}>{feature.desc}</div>
             </div>
           ))}
         </div>
@@ -221,29 +241,27 @@ const FeaturesSection = () => {
 
 const AppContent = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const { user, isAdmin, isInventory, isModerator } = useAuth();
   
   return (
     <>
       <AnnouncementBar />
-      <Navbar onCartClick={() => setIsCartOpen(true)} />
+      <Navbar />
       <main className="flex-grow">
         <Suspense fallback={<PageFallback />}>
           <Routes>
+            {/* Public routes */}
             <Route path="/" element={
               <>
                 <HeroSection />
                 <CategoriesSection />
-                <div id="productos" className="max-w-7xl mx-auto px-4 py-12">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>
-                    ✨ Productos Destacados
-                  </h2>
+                <div id="productos" className="max-w-7xl mx-auto px-4 py-8">
+                  <h2 className="text-3xl font-bold mb-2" style={{ color: 'var(--theme-text)' }}>Productos Destacados</h2>
                   <p style={{ color: 'var(--theme-text-secondary)' }}>Los favoritos de nuestros clientes</p>
                   <FeaturedProducts />
                 </div>
-                <div className="max-w-7xl mx-auto px-4 py-12">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-8" style={{ color: 'var(--theme-text)' }}>
-                    📦 Catálogo Completo
-                  </h2>
+                <div className="max-w-7xl mx-auto px-4 py-8">
+                  <h2 className="text-3xl font-bold mb-6" style={{ color: 'var(--theme-text)' }}>Catálogo Completo</h2>
                   <ProductGrid />
                 </div>
                 <FeaturesSection />
@@ -251,18 +269,67 @@ const AppContent = () => {
             } />
             <Route path="/contacto" element={<ContactPage />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/favoritos" element={<WishlistPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
-            <Route path="/perfil" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-            <Route path="/dashboard" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
-            <Route path="/pedidos" element={<ProtectedRoute><CustomerDashboard /></ProtectedRoute>} />
-            <Route path="/wishlist" element={<ProtectedRoute><WishlistPage /></ProtectedRoute>} />
+            <Route path="/favoritos" element={<WishlistPage />} />
             <Route path="/order/:id" element={<OrderTrackingPage />} />
-            <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
-            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-            <Route path="/seller" element={<ProtectedRoute><InventoryDashboard /></ProtectedRoute>} />
-            <Route path="/moderator" element={<ProtectedRoute><ModeratorDashboard /></ProtectedRoute>} />
-            <Route path="/support" element={<ProtectedRoute><SupportChat /></ProtectedRoute>} />
+            
+            {/* Customer routes - any logged user */}
+            <Route path="/perfil" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR', 'INVENTORY', 'CUSTOMER']}>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/dashboard" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR', 'INVENTORY', 'CUSTOMER']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/pedidos" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR', 'INVENTORY', 'CUSTOMER']}>
+                <CustomerDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/checkout" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR', 'INVENTORY', 'CUSTOMER']}>
+                <CheckoutPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/wishlist" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'MODERATOR', 'INVENTORY', 'CUSTOMER']}>
+                <WishlistPage />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin routes - only ADMIN */}
+            <Route path="/admin" element={
+              <AdminOnlyRoute>
+                <AdminDashboard />
+              </AdminOnlyRoute>
+            } />
+            
+            {/* Inventory routes - INVENTORY and ADMIN */}
+            <Route path="/seller" element={
+              <StaffRoute>
+                <InventoryDashboard />
+              </StaffRoute>
+            } />
+            
+            {/* Moderator routes - MODERATOR and ADMIN */}
+            <Route path="/moderator" element={
+              <StaffRoute>
+                <ModeratorDashboard />
+              </StaffRoute>
+            } />
+            
+            {/* Support - all staff */}
+            <Route path="/support" element={
+              <StaffRoute>
+                <SupportChat />
+              </StaffRoute>
+            } />
+            
+            {/* Default redirect */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </Suspense>
       </main>

@@ -235,10 +235,10 @@ const Navbar = memo(({ onCartClick }) => {
                         <Heart className="w-4 h-4" /> Wishlist
                       </Link>
                       
-                      {(isAdmin || isInventory) && (
+                      {(isAdmin) && (
                         <>
                           <div className="px-4 py-1 text-xs uppercase" style={{ color: 'var(--theme-text-secondary)' }}>
-                            Admin
+                            Administración
                           </div>
                           <Link 
                             to="/admin"
@@ -246,7 +246,55 @@ const Navbar = memo(({ onCartClick }) => {
                             style={{ color: 'var(--theme-text)' }}
                             onClick={() => setIsUserMenuOpen(false)}
                           >
-                            <Shield className="w-4 h-4" /> Dashboard
+                            <Shield className="w-4 h-4" /> Panel Admin
+                          </Link>
+                          <Link 
+                            to="/moderator"
+                            className="flex items-center gap-3 px-4 py-2 text-sm transition-colors"
+                            style={{ color: 'var(--theme-text)' }}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Headphones className="w-4 h-4" /> Moderación
+                          </Link>
+                          <Link 
+                            to="/seller"
+                            className="flex items-center gap-3 px-4 py-2 text-sm transition-colors"
+                            style={{ color: 'var(--theme-text)' }}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Package className="w-4 h-4" /> Inventario
+                          </Link>
+                        </>
+                      )}
+                      
+                      {(isModerator && !isAdmin) && (
+                        <>
+                          <div className="px-4 py-1 text-xs uppercase" style={{ color: 'var(--theme-text-secondary)' }}>
+                            Moderación
+                          </div>
+                          <Link 
+                            to="/moderator"
+                            className="flex items-center gap-3 px-4 py-2 text-sm transition-colors"
+                            style={{ color: 'var(--theme-text)' }}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Headphones className="w-4 h-4" /> Panel Moderador
+                          </Link>
+                        </>
+                      )}
+                      
+                      {(isInventory && !isAdmin) && (
+                        <>
+                          <div className="px-4 py-1 text-xs uppercase" style={{ color: 'var(--theme-text-secondary)' }}>
+                            Inventario
+                          </div>
+                          <Link 
+                            to="/seller"
+                            className="flex items-center gap-3 px-4 py-2 text-sm transition-colors"
+                            style={{ color: 'var(--theme-text)' }}
+                            onClick={() => setIsUserMenuOpen(false)}
+                          >
+                            <Package className="w-4 h-4" /> Panel Inventario
                           </Link>
                         </>
                       )}
