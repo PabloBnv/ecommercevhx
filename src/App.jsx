@@ -68,7 +68,7 @@ const HeroSection = () => {
   const slide = heroSlides[currentSlide];
   
   return (
-    <div className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <div className="relative min-h-[50vh] flex items-center justify-center overflow-hidden">
       <div className="absolute inset-0">
         <img
           src={slide.image}
@@ -85,13 +85,13 @@ const HeroSection = () => {
         }}
       />
       
-      <div className="relative z-10 max-w-6xl mx-auto px-4 text-center">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 text-center py-8">
         <div className="inline-block px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4" style={{ backgroundColor: theme.colors.accent, color: theme.colors.buttonText }}>
           {slide.subtitle}
         </div>
         
         <h1 
-          className="text-5xl md:text-7xl lg:text-8xl font-black mb-4 tracking-tighter"
+          className="text-4xl md:text-5xl lg:text-6xl font-bold mb-3 tracking-tight"
           style={{ 
             color: theme.colors.text,
             fontFamily: theme.fonts.display,
@@ -102,17 +102,17 @@ const HeroSection = () => {
         </h1>
         
         <p 
-          className="text-xl md:text-2xl max-w-2xl mx-auto mb-8"
+          className="text-base md:text-lg max-w-xl mx-auto mb-6"
           style={{ color: theme.colors.textSecondary }}
         >
           Las mejores tendencias en moda urbana y zapatillas. 
           Calidad premium, precios accesibles.
         </p>
         
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <a 
             href="#productos"
-            className="px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105 hover:shadow-2xl"
+            className="px-8 py-3 rounded-xl font-semibold text-base transition-all hover:scale-105"
             style={{
               backgroundColor: theme.colors.accent,
               color: theme.colors.buttonText,
@@ -123,7 +123,7 @@ const HeroSection = () => {
           </a>
           <a 
             href="#categorias"
-            className="px-10 py-4 rounded-2xl font-bold text-lg transition-all hover:scale-105"
+            className="px-8 py-3 rounded-xl font-semibold text-base transition-all hover:scale-105"
             style={{
               backgroundColor: 'transparent',
               color: theme.colors.text,
